@@ -482,7 +482,9 @@ class Wmain(SimpleGladeApp):
         self.get_widget('txtSearch').set_placeholder_text(_('buscar...'))
 
         if conf.STARTUP_LOCAL:
-            self.addTab(self.nbConsole,'local')
+            self.addTab(self.nbConsole,'LOCAL')
+
+        self.get_widget("contextMenu").hide()
 
     def update_visual(self):
         window = self.get_widget("wMain")
@@ -2078,7 +2080,7 @@ class Wmain(SimpleGladeApp):
                     return True
             if isinstance(widget, Gtk.Toolbar) and widget.get_drop_index(event.x,event.y) < widget.get_n_items():
                 return True
-            self.addTab(widget if isinstance(widget, Gtk.Notebook) else self.nbConsole, 'local')
+            self.addTab(widget if isinstance(widget, Gtk.Notebook) else self.nbConsole, 'LOCAL')
             return True
     #-- Wmain.on_double_click }
 

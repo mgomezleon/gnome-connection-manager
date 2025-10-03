@@ -11,4 +11,5 @@ toolbutton button {
 notebook tab {
     border-right: 1px solid #bcbebf;
     border-left: 1px solid #bcbebf;
+    margin-left: -5px;
 }
