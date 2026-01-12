@@ -942,14 +942,16 @@ class Wmain(SimpleGladeApp):
         menuItem.connect("activate", self.on_popupmenu, 'S')
         menuItem.show()
 
+        GTK_GOTO_LAST = "gtk-goto-last"
         self.popupMenu.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name("gtk-goto-last", Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_LAST, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPH')
         menuItem.show()
 
+        GTK_GOTO_BOTTOM = "gtk-goto-bottom"
         self.popupMenu.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name("gtk-goto-bottom", Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_BOTTOM, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
@@ -1096,13 +1098,13 @@ class Wmain(SimpleGladeApp):
         menuItem.show()
 
         self.popupMenuTab.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_LAST, Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPH')
         menuItem.show()
 
         self.popupMenuTab.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_BOTTOM, Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
