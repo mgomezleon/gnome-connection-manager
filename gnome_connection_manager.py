@@ -942,14 +942,14 @@ class Wmain(SimpleGladeApp):
         menuItem.connect("activate", self.on_popupmenu, 'S')
         menuItem.show()
 
-        GTK_GOTO_LAST = "gtk-goto-last"
+        GTK_GOTO_LAST = "go-next"
         self.popupMenu.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
         menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_LAST, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPH')
         menuItem.show()
 
-        GTK_GOTO_BOTTOM = "gtk-goto-bottom"
+        GTK_GOTO_BOTTOM = "go-down"
         self.popupMenu.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
         menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_BOTTOM, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
