@@ -566,6 +566,9 @@ class Wmain(SimpleGladeApp):
             else:
                 self.popupMenu.mnuCopy.set_sensitive(widget.get_has_selection())
                 self.popupMenu.mnuLog.set_active( hasattr(widget, "log_handler_id") and widget.log_handler_id != 0 )
+                self.popupMenu.mnuToggleMenu.set_active(self.get_widget("contextMenu").get_visible())
+                self.popupMenu.mnuToggleToolbar.set_active(conf.SHOW_TOOLBAR)
+                self.popupMenu.mnuTogglePanel.set_active(conf.SHOW_PANEL)
                 self.popupMenu.terminal = widget
                 self.popupMenu.popup( None, None, None, None, event.button, event.time)
 
@@ -992,7 +995,26 @@ class Wmain(SimpleGladeApp):
         menuItem.connect("activate", self.on_popupmenu, 'X')
         menuItem.show()
 
-        menuItem = Gtk.MenuItem()
+        menuItem = Gtk.SeparatorMenuItem()
+        self.popupMenu.append(menuItem)
+        menuItem.show()
+
+        self.popupMenu.mnuToggleMenu = menuItem = Gtk.CheckMenuItem(label=_("Barra de menú"))
+        self.popupMenu.append(menuItem)
+        menuItem.connect("activate", self.on_toggle_context_menu)
+        menuItem.show()
+
+        self.popupMenu.mnuToggleToolbar = menuItem = Gtk.CheckMenuItem(label=_("Mostrar Toolbar"))
+        self.popupMenu.append(menuItem)
+        menuItem.connect("activate", self.on_show_toolbar_toggled)
+        menuItem.show()
+
+        self.popupMenu.mnuTogglePanel = menuItem = Gtk.CheckMenuItem(label=_("Mostrar Panel"))
+        self.popupMenu.append(menuItem)
+        menuItem.connect("activate", self.on_show_panel_toggled)
+        menuItem.show()
+
+        menuItem = Gtk.SeparatorMenuItem()
         self.popupMenu.append(menuItem)
         menuItem.show()
 
@@ -1058,6 +1080,24 @@ class Wmain(SimpleGladeApp):
         menuItem.connect("activate", lambda *args: self.treeServers.collapse_all())
         menuItem.show()
 
+        menuItem = Gtk.SeparatorMenuItem()
+        self.popupMenuFolder.append(menuItem)
+        menuItem.show()
+
+        self.popupMenuFolder.mnuToggleMenu = menuItem = Gtk.CheckMenuItem(label=_("Barra de menú"))
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_toggle_context_menu)
+        menuItem.show()
+
+        self.popupMenuFolder.mnuToggleToolbar = menuItem = Gtk.CheckMenuItem(label=_("Mostrar Toolbar"))
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_show_toolbar_toggled)
+        menuItem.show()
+
+        self.popupMenuFolder.mnuTogglePanel = menuItem = Gtk.CheckMenuItem(label=_("Mostrar Panel"))
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_show_panel_toggled)
+        menuItem.show()
 
         #Menu contextual para tabs
         self.popupMenuTab = Gtk.Menu()
@@ -1107,6 +1147,25 @@ class Wmain(SimpleGladeApp):
         menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_BOTTOM, Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPV')
+        menuItem.show()
+
+        menuItem = Gtk.SeparatorMenuItem()
+        self.popupMenuTab.append(menuItem)
+        menuItem.show()
+
+        self.popupMenuTab.mnuToggleMenu = menuItem = Gtk.CheckMenuItem(label=_("Barra de menú"))
+        self.popupMenuTab.append(menuItem)
+        menuItem.connect("activate", self.on_toggle_context_menu)
+        menuItem.show()
+
+        self.popupMenuTab.mnuToggleToolbar = menuItem = Gtk.CheckMenuItem(label=_("Mostrar Toolbar"))
+        self.popupMenuTab.append(menuItem)
+        menuItem.connect("activate", self.on_show_toolbar_toggled)
+        menuItem.show()
+
+        self.popupMenuTab.mnuTogglePanel = menuItem = Gtk.CheckMenuItem(label=_("Mostrar Panel"))
+        self.popupMenuTab.append(menuItem)
+        menuItem.connect("activate", self.on_show_panel_toggled)
         menuItem.show()
 
     def createMenuItem(self, shortcut, label):
@@ -1943,6 +2002,10 @@ class Wmain(SimpleGladeApp):
             self.hpMain.previous_position = self.hpMain.get_position()
             GLib.timeout_add(200, lambda : self.hpMain.set_position(0))
         self.get_widget("show_panel").set_active(visibility)
+        if hasattr(self, 'popupMenu'):
+            self.popupMenu.mnuTogglePanel.set_active(visibility)
+            self.popupMenuTab.mnuTogglePanel.set_active(visibility)
+            self.popupMenuFolder.mnuTogglePanel.set_active(visibility)
         conf.SHOW_PANEL = visibility
 
     def set_toolbar_visible(self, visibility):
@@ -1952,7 +2015,24 @@ class Wmain(SimpleGladeApp):
         else:
             self.get_widget("toolbar1").hide()
         self.get_widget("show_toolbar").set_active(visibility)
+        if hasattr(self, 'popupMenu'):
+            self.popupMenu.mnuToggleToolbar.set_active(visibility)
+            self.popupMenuTab.mnuToggleToolbar.set_active(visibility)
+            self.popupMenuFolder.mnuToggleToolbar.set_active(visibility)
         conf.SHOW_TOOLBAR = visibility
+
+    def set_context_menu_visible(self, visibility):
+        self.get_widget("contextMenu").set_visible(visibility)
+        self.get_widget("show_context_menu").set_active(visibility)
+        self.popupMenu.mnuToggleMenu.set_active(visibility)
+        self.popupMenuTab.mnuToggleMenu.set_active(visibility)
+        self.popupMenuFolder.mnuToggleMenu.set_active(visibility)
+
+    def on_toggle_context_menu(self, widget, *args):
+        self.set_context_menu_visible(widget.get_active())
+
+    def on_show_context_menu_toggled(self, widget, *args):
+        self.set_context_menu_visible(widget.get_active())
 
     #-- Wmain custom methods }
 
@@ -2341,6 +2421,9 @@ class Wmain(SimpleGladeApp):
                 self.popupMenuFolder.mnuDel.show()
                 self.treeServers.grab_focus()
                 self.treeServers.set_cursor( path, col, 0)
+            self.popupMenuFolder.mnuToggleMenu.set_active(self.get_widget("contextMenu").get_visible())
+            self.popupMenuFolder.mnuToggleToolbar.set_active(conf.SHOW_TOOLBAR)
+            self.popupMenuFolder.mnuTogglePanel.set_active(conf.SHOW_PANEL)
             self.popupMenuFolder.popup( None, None, None, None, event.button, event.time)
             return True
         else:
@@ -3360,8 +3443,11 @@ class NotebookTabLabel(Gtk.HBox):
                 self.popup.mnuSplitH.hide()
                 self.popup.mnuSplitV.hide()
 
-            #enable or disable log checkbox according to terminal 
+            #enable or disable log checkbox according to terminal
             self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_children()[0].log_handler_id != 0 )
+            self.popup.mnuToggleMenu.set_active(wMain.get_widget("contextMenu").get_visible())
+            self.popup.mnuToggleToolbar.set_active(conf.SHOW_TOOLBAR)
+            self.popup.mnuTogglePanel.set_active(conf.SHOW_PANEL)
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
         elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:

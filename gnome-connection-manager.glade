@@ -2194,6 +2194,15 @@ Ej: ##D=1000&lt;/span&gt;</property>
                         <signal name="toggled" handler="on_show_panel_toggled" swapped="no"/>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkCheckMenuItem" id="show_context_menu">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Barra de menú</property>
+                        <property name="use-underline">True</property>
+                        <signal name="toggled" handler="on_show_context_menu_toggled" swapped="no"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
