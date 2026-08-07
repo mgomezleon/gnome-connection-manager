@@ -3375,7 +3375,7 @@ class NotebookTabLabel(Gtk.HBox):
         close_btn = Gtk.Button()
         close_btn.set_relief(Gtk.ReliefStyle.NONE)
         close_btn.connect('clicked', self.on_close_tab, owner_)
-        close_btn.set_size_request(image_w+7, image_h+6)
+        close_btn.set_size_request(image_w+0, image_h+0)
         close_btn.add(close_image)
         #style = close_btn.get_style();
         self.eb2 = Gtk.EventBox()
