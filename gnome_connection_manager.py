@@ -555,6 +555,7 @@ class Wmain(SimpleGladeApp):
         self.current = None
         self.count = 0
         self.row_activated = False
+        self.row_color_pending = False
     #-- Wmain.new }
 
     #-- Wmain custom methods {
@@ -1698,7 +1699,7 @@ class Wmain(SimpleGladeApp):
                 path = path + '/' + folder
                 row = self.get_folder(self.treeModel, '', path)
                 if row == None:
-                    group = self.treeModel.prepend(group, [folder, None, iconDir, '#fff'])
+                    group = self.treeModel.prepend(group, [folder, None, iconDir, None])
                 else:
                     group = row.iter
 
@@ -1715,7 +1716,7 @@ class Wmain(SimpleGladeApp):
 
             groups[grupo].sort(key=operator.attrgetter('name'))
             for host in groups[grupo]:
-                self.treeModel.append(group, [host.name, host, iconHost, '#fff'])
+                self.treeModel.append(group, [host.name, host, iconHost, None])
                 mnuItem = Gtk.ImageMenuItem(label=host.name)
                 mnuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NETWORK, Gtk.IconSize.MENU))
                 mnuItem.show()
@@ -1737,16 +1738,24 @@ class Wmain(SimpleGladeApp):
         else:
             i = self.treeModel.iter_children(node)
 
-        if i:
-            self.treeModel[i][3] = self.servers_background_color()
-            if self.treeModel[i][1]==None and self.treeServers.row_expanded(self.treeModel.get_path(i)) and self.treeModel.iter_has_child(i):
-                self.update_row_color(i)
-
-        i = self.treeModel.iter_next(i) if i else None
         while i:
             self.treeModel[i][3] = self.servers_background_color()
-            self.update_row_color(i)
+            #solo alternan color las filas visibles, las de un nodo colapsado se repintan al expandirlo
+            if self.treeModel.iter_has_child(i) and self.treeServers.row_expanded(self.treeModel.get_path(i)):
+                self.update_row_color(i)
             i = self.treeModel.iter_next(i)
+
+    def queue_row_color_update(self):
+        #expand_all()/collapse_all() emiten una señal por fila, con un solo repintado alcanza
+        if self.row_color_pending:
+            return
+        self.row_color_pending = True
+        GLib.idle_add(self.flush_row_color_update)
+
+    def flush_row_color_update(self):
+        self.row_color_pending = False
+        self.update_row_color()
+        return False
 
     def get_folder(self, obj, folder, path):
         if not obj:
@@ -2422,13 +2431,13 @@ class Wmain(SimpleGladeApp):
     #-- Wmain.on_tvServers_row_activated }
 
     def on_tvServers_row_collapsed(self, widget, *args):
-        self.update_row_color()
+        self.queue_row_color_update()
 
     def on_tvServers_row_expanded(self, widget, *args):
-        self.update_row_color()
+        self.queue_row_color_update()
 
     def on_tvServers_style_updated(self, widget, *args):
-        self.update_row_color()
+        self.queue_row_color_update()
 
     #-- Wmain.on_tvServers_button_press_event {
     def on_tvServers_button_press_event(self, widget, event, *args):
