@@ -79,6 +79,7 @@ from SimpleGladeApp import bindtextdomain
 import configparser
 import pyAES
 import urlregex
+from typing import TYPE_CHECKING
 
 app_name = "Gnome Connection Manager"
 app_version = "1.2.1"
@@ -157,6 +158,10 @@ glade_dir = ""
 locale_dir = BASE_PATH + "/lang"
 
 bindtextdomain(domain_name, locale_dir)
+
+#bindtextdomain() instala _() en builtins via gettext.install(), los analizadores estaticos no lo ven
+if TYPE_CHECKING:
+    def _(message): return message
 
 groups={}
 shortcuts={}
