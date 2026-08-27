@@ -317,7 +317,7 @@ def initialise_encyption_key():
 def xor(pw, str1):
     c = 0
     liste = []
-    for k in xrange(len(str1)):
+    for k in range(len(str1)):
         if c > len(pw)-1:
             c = 0
         fi = ord(pw[c])
