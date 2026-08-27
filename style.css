@@ -20,3 +20,14 @@ notebook header tabs tab button {
     min-height: 0;
     min-width: 0;
 }
+
+box.servers-header {
+    padding: 1px 2px 1px 6px;
+    border-bottom: 1px solid #bcbebf;
+}
+
+box.servers-header button {
+    padding: 0 2px;
+    min-height: 0;
+    min-width: 0;
+}

@@ -1,0 +1,10 @@
+<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(.81 0 0 .81 7.3234 1.52)">
+  <g transform="translate(-9.0539 -1.9507)">
+   <path class="jp-icon3" d="m13.374 1.9507-3.68 3.68-3.68-3.68-1.12 1.12 4.8 4.8 4.8-4.8z" fill="#616161" stroke-width=".8"/>
+  </g>
+  <g transform="translate(-7.36)">
+   <path class="jp-icon3" d="m11.68 16-3.68-3.68-3.68 3.68-1.12-1.12 4.8-4.8 4.8 4.8z" fill="#616161" stroke-width=".8"/>
+  </g>
+ </g>
+</svg>

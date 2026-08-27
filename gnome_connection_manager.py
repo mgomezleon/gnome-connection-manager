@@ -1491,7 +1491,6 @@ class Wmain(SimpleGladeApp):
         #self.treeServers.set_grid_lines(Gtk.TreeViewGridLines.HORIZONTAL)
 
         column = Gtk.TreeViewColumn()
-        column.set_title('Servers')
         self.treeServers.append_column( column )
 
         renderer = Gtk.CellRendererPixbuf()
@@ -1506,8 +1505,37 @@ class Wmain(SimpleGladeApp):
 
         self.treeServers.set_has_tooltip(True)
         self.treeServers.connect('query-tooltip', self.on_treeServers_tooltip)
+        self.initLeftPaneHeader()
         self.loadConfig()
         self.updateTree()
+
+    def initLeftPaneHeader(self):
+        #reemplaza la cabecera del treeview por una barra propia con el titulo y los botones de expandir/contraer todo
+        self.treeServers.set_headers_visible(False)
+
+        #iconos propios en BASE_PATH/icons para no depender de la iconografia del sistema
+        Gtk.IconTheme.get_default().append_search_path(BASE_PATH + "/icons")
+
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        header.get_style_context().add_class("servers-header")
+        header.pack_start(Gtk.Label(label='Servers'), False, False, 0)
+
+        #pack_end apila desde la derecha, el primero queda mas a la derecha
+        buttons = (("gcm-collapse-all-symbolic", _("Contraer todo"), self.treeServers.collapse_all), ("gcm-expand-all-symbolic", _("Expandir todo"), self.treeServers.expand_all))
+        for icon, tooltip, action in buttons:
+            button = Gtk.Button(image=Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.MENU), always_show_image=True, relief=Gtk.ReliefStyle.NONE)
+            button.set_focus_on_click(False)
+            button.set_tooltip_text(tooltip)
+            button.connect("clicked", lambda widget, action=action: action())
+            header.pack_end(button, False, False, 0)
+
+        scroll = self.treeServers.get_parent()
+        panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.hpMain.remove(scroll)
+        panel.pack_start(header, False, False, 0)
+        panel.pack_start(scroll, True, True, 0)
+        self.hpMain.pack1(panel, False, True)
+        panel.show_all()
 
     def on_treeServers_tooltip(self, widget, x, y, keyboard, tooltip):
         x,y = widget.convert_widget_to_bin_window_coords(x, y)
