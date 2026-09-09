@@ -86,6 +86,47 @@ app_version = "1.2.1"
 app_web = "http://www.kuthulu.com/gcm"
 app_fileversion = "1"
 
+def get_launcher_file():
+    #.desktop que arranco la app: GLib exporta estas dos variables al lanzar desde un lanzador
+    launcher = os.environ.get("GIO_LAUNCHED_DESKTOP_FILE", "")
+    #la variable se hereda a los procesos hijos, asi que solo es nuestra si el pid coincide con el propio
+    if not launcher or os.environ.get("GIO_LAUNCHED_DESKTOP_FILE_PID") != str(os.getpid()):
+        return ""
+    return launcher if os.path.isfile(launcher) else ""
+
+launcher_file = get_launcher_file()
+
+def get_launcher_title():
+    #Nombre del lanzador, traducido si el .desktop trae Name[xx]
+    if not launcher_file:
+        return ""
+    try:
+        keyfile = GLib.KeyFile()
+        keyfile.load_from_file(launcher_file, GLib.KeyFileFlags.NONE)
+        return keyfile.get_locale_string("Desktop Entry", "Name", None) or ""
+    except Exception:
+        return ""
+
+launcher_title = get_launcher_title()
+
+def set_launcher_identity():
+    #Identidad propia por lanzador para que GNOME no confunda las ventanas y use el icono de cada .desktop.
+    #GTK3 usa g_get_prgname() como app_id en Wayland y como WM_CLASS en X11; si vale igual que el nombre
+    #del archivo .desktop, el Shell resuelve el lanzador exacto sin depender de StartupWMClass
+    if not launcher_file:
+        return
+    app_id = os.path.basename(launcher_file)[:-len(".desktop")]
+    GLib.set_prgname(app_id)
+    Gdk.set_program_class(app_id)
+
+set_launcher_identity()
+
+def get_app_title():
+    #manda el titulo elegido en Preferencias; si es el de fabrica, gana el nombre del lanzador
+    if conf.APP_TITLE and conf.APP_TITLE != app_name:
+        return conf.APP_TITLE
+    return launcher_title or app_name
+
 BASE_PATH = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 SSH_BIN = 'ssh'
@@ -417,6 +458,7 @@ class Wmain(SimpleGladeApp):
 
         self.createMenu()
         self.window = self.get_widget("wMain")
+        self.window.set_title(get_app_title())
 
         self._current_fullscreen_state = False
 
@@ -1894,9 +1936,9 @@ class Wmain(SimpleGladeApp):
             else:
                 tab_text = ''
             if tab_text:
-                self.wMain.set_title("%s - %s" % (conf.APP_TITLE or app_name, tab_text.strip()))
+                self.wMain.set_title("%s - %s" % (get_app_title(), tab_text.strip()))
             else:
-                self.wMain.set_title(conf.APP_TITLE or app_name)
+                self.wMain.set_title(get_app_title())
 
     def split_notebook(self, direction):
         csp = self.current.get_parent() if self.current!=None else None
