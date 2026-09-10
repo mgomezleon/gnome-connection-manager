@@ -1423,7 +1423,7 @@ class Wmain(SimpleGladeApp):
                 # Note: log enablement defaults to host.log except for 'local'
                 # sessions that do not have a saved session to seed the host
                 # configuration, but rather use a global GCM config toggle
-                if host.name == 'local':
+                if host.name.lower() == 'local':
                     #print ("D: Local session logging set to: %s\n" % (conf.LOG_LOCAL))
                     host.log = conf.LOG_LOCAL
 
