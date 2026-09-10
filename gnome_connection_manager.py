@@ -1027,7 +1027,7 @@ class Wmain(SimpleGladeApp):
         menuItem.show()
 
         self.popupMenu.mnuCopyPaste = menuItem = Gtk.ImageMenuItem(label=_("Copiar y Pegar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_INDEX, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-copy-paste-symbolic", Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'CV')
         menuItem.show()
