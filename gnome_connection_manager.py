@@ -59,6 +59,8 @@ except:
 
 #check Terminal version
 TERMINAL_V048 = 'spawn_async' in Vte.Terminal.__dict__
+#get_text_range() esta deprecada y desde VTE 0.80 devuelve None; get_text_range_format() existe desde 0.72
+TERMINAL_TEXT_FORMAT = 'get_text_range_format' in Vte.Terminal.__dict__
 
 #Ver si expect esta instalado
 try:
@@ -408,6 +410,14 @@ def vte_feed(terminal, data):
             terminal.feed_child(data, len(data))
     else:
         terminal.feed_child(data, len(data))
+
+def vte_get_text_range(terminal, start_row, start_col, end_row, end_col):
+    #Devuelve el texto del rango, o '' si VTE no lo puede entregar
+    if TERMINAL_TEXT_FORMAT:
+        text,length = terminal.get_text_range_format(Vte.Format.TEXT, start_row, start_col, end_row, end_col)
+    else:
+        text,b = terminal.get_text_range(start_row, start_col, end_row, end_col, None, None)
+    return text if text != None else ''
 
 def vte_run(terminal, command, arg=None):
     term_type = terminal.host.term if hasattr(terminal, 'host') and terminal.host.term else conf.TERM or os.getenv("TERM") or DEFAULT_TERM_TYPE
@@ -808,7 +818,7 @@ class Wmain(SimpleGladeApp):
 
 
         cols = terminal.get_column_count()
-        lines,b = terminal.get_text_range(0, 0, terminal.get_property('scrollback-lines'), cols, None, None )
+        lines = vte_get_text_range(terminal, 0, 0, terminal.get_property('scrollback-lines'), cols)
         wrapped = []
         for x in lines.splitlines():
             if len(x)==0:
@@ -1282,10 +1292,12 @@ class Wmain(SimpleGladeApp):
     def on_contents_changed(self, terminal):
         col,row = terminal.get_cursor_position()
         if terminal.last_logged_row != row:
-            text,b = terminal.get_text_range(terminal.last_logged_row, terminal.last_logged_col, row, col, None, None)
+            text = vte_get_text_range(terminal, terminal.last_logged_row, terminal.last_logged_col, row, col)
             terminal.last_logged_row = row
             terminal.last_logged_col = col
-            terminal.log.write(text[:-1])
+            #el texto va completo: los tramos son contiguos y recortar el ultimo
+            #caracter pegaba el fin de un tramo con el inicio del siguiente
+            terminal.log.write(text)
 
     def set_terminal_logger(self, terminal, enable_logging=True):
         if enable_logging:
@@ -2056,7 +2068,7 @@ class Wmain(SimpleGladeApp):
             self.lastPath = os.path.dirname(filename)
 
             try:
-                buff,b = terminal.get_text_range(0, 0, terminal.get_property('scrollback-lines')-1, terminal.get_column_count()-1, None, None )
+                buff = vte_get_text_range(terminal, 0, 0, terminal.get_property('scrollback-lines')-1, terminal.get_column_count()-1)
                 f = open(filename, "w")
                 f.write(buff.strip())
                 f.close()
