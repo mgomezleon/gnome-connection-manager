@@ -473,7 +473,10 @@ class Wmain(SimpleGladeApp):
 
         self._current_fullscreen_state = False
 
-        if conf.VERSION == 0:
+        if not enc_passwd:
+            #La clave se genera cuando no hay ninguna, no cuando conf.VERSION es 0: esa
+            #condicion tambien es verdadera para una configuracion que no existe todavia, y
+            #entonces reescribia la clave del perfil dejando ilegibles sus passwords
             initialise_encyption_key()
 
         settings = Gtk.Settings.get_default()
@@ -1663,6 +1666,11 @@ class Wmain(SimpleGladeApp):
 
         cp= configparser.RawConfigParser(  )
         cp.read( CONFIG_FILE )
+
+        if not os.path.exists(CONFIG_FILE):
+            #cp.read() no falla con un archivo que no existe: sin esto conf.VERSION queda en
+            #0 toda la sesion y decrypt() usa la rama legacy, que esta rota en py3
+            conf.VERSION = app_fileversion
 
         #Leer configuracion general
         try:
