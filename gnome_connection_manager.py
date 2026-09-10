@@ -3130,7 +3130,7 @@ class Wconfig(SimpleGladeApp):
 
         self.tblGeneral.rows = 0
         self.addParam(_("Separador de Palabras"), "conf.WORD_SEPARATORS", str)
-        self.addParam(_("Tamaño del buffer"), "conf.BUFFER_LINES", int, 1, 1000000)
+        self.addParam(_("Tamaño del buffer"), "conf.BUFFER_LINES", int, 1, 100000, tooltip=_("Líneas de scrollback que guarda cada consola. Guardar el buffer a un archivo y la búsqueda sin PCRE2 recorren el buffer completo: valores altos los vuelven lentos y ocupan memoria por consola abierta."))
         self.addParam(_("Transparencia"), "conf.TRANSPARENCY", int, 0, 100)
         self.addParam(_("TERM"), "conf.TERM", str)
         self.addParam(_("Ruta de logs"), "conf.LOG_PATH", str)
@@ -3224,7 +3224,7 @@ class Wconfig(SimpleGladeApp):
     #-- Wconfig.new }
 
     #-- Wconfig custom methods {
-    def addParam(self, name, field, ptype, *args):
+    def addParam(self, name, field, ptype, *args, tooltip=None):
         x = self.tblGeneral.rows
         self.tblGeneral.rows += 1
         value = eval(field)
@@ -3272,6 +3272,9 @@ class Wconfig(SimpleGladeApp):
             lbl.show()
             self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
             self.tblGeneral.attach(obj, 1, 2, x, x+1, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, 0)
+
+        if tooltip:
+            obj.set_tooltip_text(tooltip)
 
     def on_edited(self, widget, rownum, value, model, colnum):
         model[rownum][colnum] = value
