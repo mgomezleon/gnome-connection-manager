@@ -130,6 +130,10 @@ def get_app_title():
 
 BASE_PATH = os.path.dirname(os.path.abspath(sys.argv[0]))
 
+#iconos propios en BASE_PATH/icons para no depender de la iconografia del sistema; se registran antes de
+#construir la ventana para que tambien los resuelvan los widgets que vienen del .glade
+Gtk.IconTheme.get_default().append_search_path(BASE_PATH + "/icons")
+
 SSH_BIN = 'ssh'
 TEL_BIN = 'telnet'
 SHELL   = os.environ["SHELL"]
@@ -1048,16 +1052,16 @@ class Wmain(SimpleGladeApp):
         menuItem.connect("activate", self.on_popupmenu, 'S')
         menuItem.show()
 
-        GTK_GOTO_LAST = "go-next"
+        ICON_SPLIT_H = "gcm-split-h-symbolic"
         self.popupMenu.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_LAST, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(ICON_SPLIT_H, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPH')
         menuItem.show()
 
-        GTK_GOTO_BOTTOM = "go-down"
+        ICON_SPLIT_V = "gcm-split-v-symbolic"
         self.popupMenu.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_BOTTOM, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(ICON_SPLIT_V, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
@@ -1134,7 +1138,7 @@ class Wmain(SimpleGladeApp):
         self.popupMenuFolder = Gtk.Menu()
 
         self.popupMenuFolder.mnuConnect = menuItem = Gtk.ImageMenuItem(label=_("Conectar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_EXECUTE, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-connect-symbolic", Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_btnConnect_clicked)
         menuItem.show()
@@ -1146,25 +1150,25 @@ class Wmain(SimpleGladeApp):
         menuItem.show()
 
         self.popupMenuFolder.mnuAdd = menuItem = Gtk.ImageMenuItem(label=_("Agregar Host"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_ADD, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-add-host-symbolic", Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_btnAdd_clicked)
         menuItem.show()
 
         self.popupMenuFolder.mnuEdit = menuItem = Gtk.ImageMenuItem(label=_("Editar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_EDIT, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-edit-symbolic", Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_bntEdit_clicked)
         menuItem.show()
 
         self.popupMenuFolder.mnuDel = menuItem = Gtk.ImageMenuItem(label=_("Eliminar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DELETE, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-delete-symbolic", Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_btnDel_clicked)
         menuItem.show()
 
         self.popupMenuFolder.mnuDup = menuItem = Gtk.ImageMenuItem(label=_("Duplicar Host"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DND_MULTIPLE, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-duplicate-host-symbolic", Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'D')
         menuItem.show()
@@ -1173,12 +1177,15 @@ class Wmain(SimpleGladeApp):
         self.popupMenuFolder.append(menuItem)
         menuItem.show()
 
+        #mismos iconos propios que los botones de la cabecera del panel de servidores
         self.popupMenuFolder.mnuExpand = menuItem = Gtk.ImageMenuItem(label=_("Expandir todo"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-expand-all-symbolic", Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", lambda *args: self.treeServers.expand_all())
         menuItem.show()
 
         self.popupMenuFolder.mnuCollapse = menuItem = Gtk.ImageMenuItem(label=_("Contraer todo"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-collapse-all-symbolic", Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", lambda *args: self.treeServers.collapse_all())
         menuItem.show()
@@ -1206,7 +1213,7 @@ class Wmain(SimpleGladeApp):
         self.popupMenuTab = Gtk.Menu()
 
         self.popupMenuTab.mnuRename = menuItem = Gtk.ImageMenuItem(label=_("Renombrar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_EDIT, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name("gcm-edit-symbolic", Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'R')
         menuItem.show()
@@ -1241,13 +1248,13 @@ class Wmain(SimpleGladeApp):
         menuItem.show()
 
         self.popupMenuTab.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_LAST, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(ICON_SPLIT_H, Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPH')
         menuItem.show()
 
         self.popupMenuTab.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(GTK_GOTO_BOTTOM, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(ICON_SPLIT_V, Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
@@ -1672,9 +1679,6 @@ class Wmain(SimpleGladeApp):
     def initLeftPaneHeader(self):
         #reemplaza la cabecera del treeview por una barra propia con el titulo y los botones de expandir/contraer todo
         self.treeServers.set_headers_visible(False)
-
-        #iconos propios en BASE_PATH/icons para no depender de la iconografia del sistema
-        Gtk.IconTheme.get_default().append_search_path(BASE_PATH + "/icons")
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
         header.get_style_context().add_class("servers-header")

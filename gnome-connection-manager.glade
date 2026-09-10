@@ -2352,7 +2352,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                 <property name="tooltip-text" translatable="yes">Separar consola horizontalmente</property>
                 <property name="label" translatable="yes">__glade_unnamed_28</property>
                 <property name="use-underline">True</property>
-                <property name="stock-id">gtk-goto-last</property>
+                <property name="icon-name">gcm-split-h-symbolic</property>
                 <signal name="clicked" handler="on_btnHSplit_clicked" swapped="no"/>
               </object>
               <packing>
@@ -2367,7 +2367,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                 <property name="tooltip-text" translatable="yes">Separar consola verticalmente</property>
                 <property name="label" translatable="yes">__glade_unnamed_29</property>
                 <property name="use-underline">True</property>
-                <property name="stock-id">gtk-goto-bottom</property>
+                <property name="icon-name">gcm-split-v-symbolic</property>
                 <signal name="clicked" handler="on_btnVSplit_clicked" swapped="no"/>
               </object>
               <packing>
