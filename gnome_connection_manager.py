@@ -152,12 +152,61 @@ assert( (USERHOME_DIR is not None) and (USERHOME_DIR != "") ), \
 assert os.path.isdir(USERHOME_DIR), \
     "FATAL: Could not locate home directory '%s' for the current user" % (USERHOME_DIR);
 
-CONFIG_DIR = USERHOME_DIR + "/.gcm"
+#Los mensajes de esta seccion van en ingles y sin _(): bindtextdomain() todavia no corrio,
+#igual que en los assert de arriba
+USAGE = """Usage: %s [options] [group/host ...]
+
+  -c, --config-dir DIR   Use DIR instead of ~/.gcm for gcm.conf, the encryption
+                         key and the default log path. Created if missing.
+  -h, --help             Show this help and exit.
+
+Each group/host argument opens a tab for that saved connection at startup.""" % (os.path.basename(sys.argv[0]))
+
+def get_config_dir(default_dir):
+    #Lo que no sea el flag se deja en sys.argv, que mas adelante se recorre como grupo/host:
+    #si el flag y su valor quedaran ahi, se tomarian como una conexion a abrir
+    config_dir = default_dir
+    rest = []
+    args = sys.argv[1:]
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg in ('-h', '--help'):
+            print(USAGE)
+            sys.exit(0)
+        elif arg in ('-c', '--config-dir'):
+            if i+1 >= len(args):
+                sys.exit("FATAL: %s requires a directory" % (arg))
+            config_dir = args[i+1]
+            i += 2
+            continue
+        elif arg.startswith('--config-dir='):
+            config_dir = arg.split('=', 1)[1]
+        else:
+            rest.append(arg)
+        i += 1
+    sys.argv[1:] = rest
+    if config_dir.strip() == '':
+        sys.exit("FATAL: --config-dir requires a directory")
+    #expanduser porque la linea Exec de un .desktop no expande el ~
+    return os.path.abspath(os.path.expanduser(config_dir))
+
+def ensure_config_dir(config_dir):
+    try:
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
+    except OSError as e:
+        sys.exit("FATAL: Could not create config directory '%s': %s" % (config_dir, e))
+    if not os.path.isdir(config_dir):
+        sys.exit("FATAL: Config directory '%s' is not a directory" % (config_dir))
+    if not os.access(config_dir, os.W_OK | os.X_OK):
+        sys.exit("FATAL: Config directory '%s' is not writable" % (config_dir))
+
+CONFIG_DIR = get_config_dir(USERHOME_DIR + "/.gcm")
 CONFIG_FILE = CONFIG_DIR + "/gcm.conf"
 KEY_FILE = CONFIG_DIR + "/.gcm.key"
 
-if not os.path.exists(CONFIG_DIR):
-    os.makedirs(CONFIG_DIR)
+ensure_config_dir(CONFIG_DIR)
 
 domain_name="gcm-lang"
 
@@ -1362,6 +1411,10 @@ class Wmain(SimpleGladeApp):
             p = terminal.get_parent()
             title = p.get_parent().get_tab_label(p).get_text().strip()
             LOG_PATH = os.path.expanduser(conf.LOG_PATH)
+            if not os.path.isabs(LOG_PATH):
+                #una ruta relativa se resuelve contra el directorio de configuracion, asi un
+                #perfil copiado con 'log-path = logs' escribe en su propio directorio
+                LOG_PATH = os.path.join(CONFIG_DIR, LOG_PATH)
             prefix = "%s/%s-%s" % (LOG_PATH, title, time.strftime("%Y%m%d"))
             if not os.path.exists(LOG_PATH):
                 os.makedirs(LOG_PATH)
