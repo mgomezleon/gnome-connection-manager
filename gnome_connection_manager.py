@@ -1662,7 +1662,7 @@ class Wmain(SimpleGladeApp):
 
         renderer = Gtk.CellRendererPixbuf()
         column.pack_start(renderer, expand=False)
-        column.add_attribute(renderer, 'stock_id', 2)
+        column.add_attribute(renderer, 'icon-name', 2)
         column.add_attribute(renderer, 'cell-background', 3)
 
         renderer = Gtk.CellRendererText()
@@ -1846,8 +1846,8 @@ class Wmain(SimpleGladeApp):
         self.menuServers.foreach(self.menuServers.remove)
         self.treeModel.clear()
 
-        iconHost = "gtk-network"
-        iconDir = "gtk-directory"
+        iconHost = "gcm-host-symbolic"
+        iconDir = "gcm-folder-symbolic"
         grupos = groups.keys()
         #grupos.sort(lambda x,y: cmp(y,x))
         grupos = sorted(grupos, reverse=True)
@@ -1868,7 +1868,7 @@ class Wmain(SimpleGladeApp):
                 menu = self.get_folder_menu(self.menuServers, '', path)
                 if menu == None:
                     menu = Gtk.ImageMenuItem(label=folder)
-                    menu.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DIRECTORY, Gtk.IconSize.MENU))
+                    menu.set_image(Gtk.Image.new_from_icon_name(iconDir, Gtk.IconSize.MENU))
                     menuNode.prepend(menu)
                     menuNode = Gtk.Menu()
                     menu.set_submenu(menuNode)
@@ -1880,7 +1880,7 @@ class Wmain(SimpleGladeApp):
             for host in groups[grupo]:
                 self.treeModel.append(group, [host.name, host, iconHost, None])
                 mnuItem = Gtk.ImageMenuItem(label=host.name)
-                mnuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NETWORK, Gtk.IconSize.MENU))
+                mnuItem.set_image(Gtk.Image.new_from_icon_name(iconHost, Gtk.IconSize.MENU))
                 mnuItem.show()
                 mnuItem.connect("activate", lambda arg, nb, h: self.addTab(nb, h), self.nbConsole, host)
                 menuNode.append(mnuItem)
