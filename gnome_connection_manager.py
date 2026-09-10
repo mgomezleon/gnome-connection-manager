@@ -82,7 +82,7 @@ from typing import TYPE_CHECKING
 
 app_name = "Gnome Connection Manager"
 app_version = "1.2.1"
-app_web = "http://www.kuthulu.com/gcm"
+app_web = "https://github.com/mgomezleon/gnome-connection-manager"
 app_fileversion = "1"
 
 def get_launcher_file():
@@ -226,7 +226,6 @@ class conf():
     CYCLE_TABS = True
     COLLAPSED_FOLDERS = ""
     LEFT_PANEL_WIDTH = 100
-    CHECK_UPDATES=True
     WINDOW_WIDTH = -1
     WINDOW_HEIGHT = -1
     FONT = ""
@@ -503,9 +502,6 @@ class Wmain(SimpleGladeApp):
         if conf.HIDE_DONATE:
             self.get_widget("btnDonate").hide()
 
-        if conf.CHECK_UPDATES:
-            GLib.timeout_add(2000, lambda: self.check_updates())
-
         #load style.css
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
@@ -601,10 +597,6 @@ class Wmain(SimpleGladeApp):
 
     #-- Wmain custom methods {
     #   Write your own methods here
-
-    def check_updates(self):
-        checker = CheckUpdates(self)
-        checker.start()
 
     def on_terminal_click(self, widget, event, *args):
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
@@ -1616,7 +1608,6 @@ class Wmain(SimpleGladeApp):
             conf.TRANSPARENCY = cp.getint("options", "transparency")
             conf.PASTE_ON_RIGHT_CLICK = cp.getboolean("options", "paste-right-click")
             conf.CONFIRM_ON_CLOSE_TAB = cp.getboolean("options", "confirm-close-tab")
-            conf.CHECK_UPDATES = cp.getboolean("options", "check-updates")
             conf.COLLAPSED_FOLDERS = cp.get("window", "collapsed-folders")
             conf.LEFT_PANEL_WIDTH = cp.getint("window", "left-panel-width")
             conf.WINDOW_WIDTH = cp.getint("window", "window-width")
@@ -1836,7 +1827,6 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "paste-right-click", conf.PASTE_ON_RIGHT_CLICK)
         cp.set("options", "confirm-close-tab", conf.CONFIRM_ON_CLOSE_TAB)
         cp.set("options", "confirm-close-tab-middle", conf.CONFIRM_ON_CLOSE_TAB_MIDDLE)
-        cp.set("options", "check-updates", conf.CHECK_UPDATES)
         cp.set("options", "font", conf.FONT)
         cp.set("options", "donate", conf.HIDE_DONATE)
         cp.set("options", "disable-hosts-stripes", conf.DISABLE_HOSTS_STRIPES)
@@ -3085,7 +3075,6 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("Reiniciar en el primer/último tab al llegar al final"), "conf.CYCLE_TABS", bool)
         self.addParam(_("Cerrar consola"), "conf.AUTO_CLOSE_TAB", list, [_("Nunca"), _("Siempre"), _("Sólo si no hay errores")])
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)
-        self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
         self.addParam(_("Ocultar botón donar"), "conf.HIDE_DONATE", bool)
         self.addParam(_("Deshabilitar franjas alternas en la ventana de hosts"), "conf.DISABLE_HOSTS_STRIPES", bool)
         self.addParam(_("Título dinámico"), "conf.UPDATE_TITLE", bool)
@@ -3655,35 +3644,6 @@ class MultilineCellRenderer(Gtk.CellRendererText):
         editor.show()
         return editor
 
-
-from threading import Thread
-class CheckUpdates(Thread):
-
-    def __init__(self, p):
-        Thread.__init__(self)
-        self.parent = p
-
-    def msg(self, text, parent):
-        self.msgBox = Gtk.MessageDialog(parent=parent, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text=text)
-        self.msgBox.set_icon_from_file(ICON_PATH)
-        self.msgBox.connect('response', self.on_clicked)
-        self.msgBox.show_all()
-        return False
-
-    def on_clicked(self, *args):
-        self.msgBox.destroy()
-
-    def run(self):
-        try:
-            import urllib.request as urllib, socket
-            socket.setdefaulttimeout(5)
-            web = urllib.urlopen('http://kuthulu.com/gcm/_current.html')
-            if web.getcode()==200:
-                new_version = web.readline().strip().decode('utf-8')
-                if len(new_version)>0 and new_version > app_version:
-                    self.tag = GLib.timeout_add(0, self.msg, "%s\n\nCURRENT VERSION: %s\nNEW VERSION: %s" % (_("Hay una nueva version disponible en http://kuthulu.com/gcm/?module=download"), app_version, new_version), self.parent.get_widget("wMain"))
-        except Exception as e:
-            pass
 
 #-- main {
 
