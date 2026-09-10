@@ -17,11 +17,6 @@ License along with this program; if not, write to the
 Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301 USA
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -77,7 +72,7 @@ def bindtextdomain(app_name, locale_dir=None):
             builtins.__dict__["_"] = lambda x: x
 
 
-class SimpleGladeApp(object):
+class SimpleGladeApp:
 
     def __init__(self, path, root=None, domain=None, **kwargs):
         """
@@ -390,7 +385,7 @@ class SimpleGladeApp(object):
         return self.builder.get_objects()
 
 
-class SimpleGtk3App(object):
+class SimpleGtk3App:
 
     """
     Basic GtkBuilder wrapper that implements the functions from

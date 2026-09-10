@@ -38,7 +38,6 @@
 # - Persist history of cluster commands. is it really necessary?
 # - Option to disable shortcuts
 
-from __future__ import with_statement
 import os
 import operator
 import sys
@@ -642,7 +641,6 @@ class Wmain(SimpleGladeApp):
         self.on_tab_focus(nb, nb.get_nth_page(nb.get_current_page()), nb.get_current_page())
 
     def on_terminal_keypress(self, widget, event, *args):
-        #if shortcuts.has_key(get_key_name(event)):
         if get_key_name(event) in shortcuts:
             cmd = shortcuts[get_key_name(event)]
             if type(cmd) == list:
@@ -2162,7 +2160,7 @@ class Wmain(SimpleGladeApp):
                     msgbox(_("Clave invalida"))
                     return
 
-                if msgconfirm(_(u'Se sobreescribirá la lista de servidores, continuar?')) != Gtk.ResponseType.OK:
+                if msgconfirm(_('Se sobreescribirá la lista de servidores, continuar?')) != Gtk.ResponseType.OK:
                     return
 
                 grupos={}
@@ -2855,7 +2853,7 @@ class Whost(SimpleGladeApp):
 
         try:
             #Guardar
-            if not group in groups: #not groups.has_key(group):
+            if not group in groups:
                 groups[group]=[]
 
             if self.isNew:
@@ -2868,7 +2866,7 @@ class Whost(SimpleGladeApp):
             else:
                 if self.oldGroup!=group:
                     #revisar que no este el nombre en el nuevo grupo
-                    if not group in groups: #if not groups.has_key(group):
+                    if not group in groups:
                         groups[group] = [ host ]
                     else:
                         for h in groups[group]:
@@ -3074,24 +3072,24 @@ class Wconfig(SimpleGladeApp):
 
         self.tblGeneral.rows = 0
         self.addParam(_("Separador de Palabras"), "conf.WORD_SEPARATORS", str)
-        self.addParam(_(u"Tamaño del buffer"), "conf.BUFFER_LINES", int, 1, 1000000)
+        self.addParam(_("Tamaño del buffer"), "conf.BUFFER_LINES", int, 1, 1000000)
         self.addParam(_("Transparencia"), "conf.TRANSPARENCY", int, 0, 100)
         self.addParam(_("TERM"), "conf.TERM", str)
         self.addParam(_("Ruta de logs"), "conf.LOG_PATH", str)
         self.addParam(_("Abrir consola local al inicio"), "conf.STARTUP_LOCAL", bool)
         self.addParam(_("Log consola local"), "conf.LOG_LOCAL", bool)
-        self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
-        self.addParam(_(u"Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
+        self.addParam(_("Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
+        self.addParam(_("Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
         self.addParam(_("Confirmar al cerrar una consola"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
-        self.addParam(_(u"Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
-        self.addParam(_(u"Reiniciar en el primer/último tab al llegar al final"), "conf.CYCLE_TABS", bool)
-        self.addParam(_("Cerrar consola"), "conf.AUTO_CLOSE_TAB", list, [_("Nunca"), _("Siempre"), _(u"Sólo si no hay errores")])
+        self.addParam(_("Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
+        self.addParam(_("Reiniciar en el primer/último tab al llegar al final"), "conf.CYCLE_TABS", bool)
+        self.addParam(_("Cerrar consola"), "conf.AUTO_CLOSE_TAB", list, [_("Nunca"), _("Siempre"), _("Sólo si no hay errores")])
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
-        self.addParam(_(u"Ocultar botón donar"), "conf.HIDE_DONATE", bool)
-        self.addParam(_(u"Deshabilitar franjas alternas en la ventana de hosts"), "conf.DISABLE_HOSTS_STRIPES", bool)
-        self.addParam(_(u"Título dinámico"), "conf.UPDATE_TITLE", bool)
-        self.addParam(_(u"Título"), "conf.APP_TITLE", str)
+        self.addParam(_("Ocultar botón donar"), "conf.HIDE_DONATE", bool)
+        self.addParam(_("Deshabilitar franjas alternas en la ventana de hosts"), "conf.DISABLE_HOSTS_STRIPES", bool)
+        self.addParam(_("Título dinámico"), "conf.UPDATE_TITLE", bool)
+        self.addParam(_("Título"), "conf.APP_TITLE", str)
 
         if len(conf.FONT_COLOR)==0:
             self.get_widget("chkDefaultColors1").set_active(True)
@@ -3124,7 +3122,7 @@ class Wconfig(SimpleGladeApp):
         #commandos
         self.treeModel = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
         self.treeCmd.set_model(self.treeModel)
-        column = Gtk.TreeViewColumn(_(u"Acción"), Gtk.CellRendererText(), text=0)
+        column = Gtk.TreeViewColumn(_("Acción"), Gtk.CellRendererText(), text=0)
         column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
         column.set_expand(True)
         self.treeCmd.append_column( column )
