@@ -196,6 +196,9 @@ _CLONE = ["clone"]
 
 ICON_PATH = BASE_PATH + "/icon.png"
 
+#ms entre volcados del log de consola: agrupa las rafagas de 'contents-changed'
+LOG_FLUSH_INTERVAL = 1000
+
 glade_dir = ""
 locale_dir = BASE_PATH + "/lang"
 
@@ -1290,14 +1293,60 @@ class Wmain(SimpleGladeApp):
         wConfig = Wconfig()
 
     def on_contents_changed(self, terminal):
+        #'contents-changed' se dispara con cada cambio del buffer, o sea continuamente
+        #mientras haya salida. Aca solo se agenda el volcado: extraer el texto en cada
+        #senal costaba una extraccion de texto y un write() por linea dibujada.
         col,row = terminal.get_cursor_position()
-        if terminal.last_logged_row != row:
-            text = vte_get_text_range(terminal, terminal.last_logged_row, terminal.last_logged_col, row, col)
-            terminal.last_logged_row = row
-            terminal.last_logged_col = col
-            #el texto va completo: los tramos son contiguos y recortar el ultimo
-            #caracter pegaba el fin de un tramo con el inicio del siguiente
-            terminal.log.write(text)
+        if row - terminal.last_logged_row >= max(1, terminal.get_property('scrollback-lines') // 2):
+            #la rafaga ya llena medio buffer: volcar ahora, si no VTE descarta las lineas
+            #mas viejas del rango pendiente y el log las pierde
+            self.cancel_pending_log_flush(terminal)
+            self.flush_terminal_log(terminal)
+            return
+        if getattr(terminal, 'log_flush_id', 0) == 0:
+            terminal.log_flush_id = GLib.timeout_add(LOG_FLUSH_INTERVAL, self.flush_terminal_log, terminal)
+
+    def cancel_pending_log_flush(self, terminal):
+        if getattr(terminal, 'log_flush_id', 0) != 0:
+            GLib.source_remove(terminal.log_flush_id)
+            terminal.log_flush_id = 0
+
+    def flush_terminal_log(self, terminal):
+        #Una sola extraccion de texto y un solo write() por intervalo, cubriendo todo
+        #lo que se acumulo desde el volcado anterior.
+        terminal.log_flush_id = 0
+        if not hasattr(terminal, 'log') or terminal.log.closed:
+            return False
+        if terminal.get_parent() == None:
+            #la consola se cerro con el volcado pendiente
+            return False
+        try:
+            col,row = terminal.get_cursor_position()
+            if terminal.last_logged_row != row:
+                text = vte_get_text_range(terminal, terminal.last_logged_row, terminal.last_logged_col, row, col)
+                terminal.last_logged_row = row
+                terminal.last_logged_col = col
+                #el texto va completo: los tramos son contiguos y recortar el ultimo
+                #caracter pegaba el fin de un tramo con el inicio del siguiente
+                terminal.log.write(text)
+        except Exception as e:
+            print(e)
+        return False
+
+    def flush_all_terminal_logs(self, widget=None):
+        #Al salir hay que volcar lo pendiente: el volcado es diferido y se perderia el
+        #ultimo tramo de cada log
+        if widget == None:
+            widget = self.hpMain
+        if isinstance(widget, Vte.Terminal):
+            if getattr(widget, 'log_flush_id', 0) != 0:
+                self.cancel_pending_log_flush(widget)
+                self.flush_terminal_log(widget)
+            return
+        if not hasattr(widget, "get_children"):
+            return
+        for w in widget.get_children():
+            self.flush_all_terminal_logs(w)
 
     def set_terminal_logger(self, terminal, enable_logging=True):
         if enable_logging:
@@ -1327,6 +1376,8 @@ class Wmain(SimpleGladeApp):
                 if os.path.exists(filename):
                     msgbox("%s\n%s" % (_("Anexar el archivo de log existente"), filename))
                     prepend = '\n\n===== %s =====\n\n' %(_("Fin del registro de sesión anterior"))
+                #buffering=1 (linea a linea) sigue siendo barato porque cada write()
+                #trae el bloque completo del intervalo: una syscall por volcado
                 terminal.log = open(filename, 'a', 1)
                 terminal.log.write("%sSession '%s' opened at %s\n%s\n" % (prepend, title, time.strftime("%Y-%m-%d %H:%M:%S"), "-"*80))
             except Exception as e:
@@ -1339,6 +1390,9 @@ class Wmain(SimpleGladeApp):
             if hasattr(terminal, "log_handler_id") and terminal.log_handler_id != 0:
                 terminal.disconnect(terminal.log_handler_id)
                 terminal.log_handler_id = 0
+                #volcar lo pendiente antes de dejar de escuchar la senal
+                self.cancel_pending_log_flush(terminal)
+                self.flush_terminal_log(terminal)
         return True
 
     def registerUrlRegexes(self, terminal):
@@ -2131,6 +2185,7 @@ class Wmain(SimpleGladeApp):
         (conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT) = self.get_widget("wMain").get_size()
         if conf.CONFIRM_ON_EXIT and self.count>0 and msgconfirm("%s %d %s" % (_("Hay"), self.count, _("consolas abiertas, confirma que desea salir?")) ) != Gtk.ResponseType.OK:
             return True
+        self.flush_all_terminal_logs()
     #-- Wmain.on_wMain_delete_event }
 
     #-- Wmain.on_guardar_como1_activate {
@@ -2217,6 +2272,7 @@ class Wmain(SimpleGladeApp):
     #-- Wmain.on_salir1_activate {
     def on_salir1_activate(self, widget, *args):
         (conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT) = self.get_widget("wMain").get_size()
+        self.flush_all_terminal_logs()
         self.writeConfig()
         Gtk.main_quit()
     #-- Wmain.on_salir1_activate }
